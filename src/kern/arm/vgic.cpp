@@ -21,6 +21,7 @@ public:
     CXX_BITFIELD_MEMBER(  5,  5, vgrp0_die, raw);
     CXX_BITFIELD_MEMBER(  6,  6, vgrp1_eie, raw);
     CXX_BITFIELD_MEMBER(  7,  7, vgrp1_die, raw);
+    CXX_BITFIELD_MEMBER(  8,  9, res0_0, raw);
     //  <<< GICv3+ only
     CXX_BITFIELD_MEMBER( 10, 10, tc, raw);
     CXX_BITFIELD_MEMBER( 11, 11, tall0, raw);
@@ -28,6 +29,7 @@ public:
     CXX_BITFIELD_MEMBER( 13, 13, tsei, raw);
     CXX_BITFIELD_MEMBER( 14, 14, tdir, raw);
     CXX_BITFIELD_MEMBER( 15, 15, dvim, raw);
+    CXX_BITFIELD_MEMBER( 16, 26, res0_1, raw);
     // >>> GICv3+ only
     CXX_BITFIELD_MEMBER( 27, 31, eoi_cnt, raw);
   };
@@ -258,6 +260,10 @@ protected:
     auto hcr = access_once(&g->hcr);
     if (!hcr.en())
       return false;
+
+    hcr.res0_0() = 0;
+    hcr.res0_1() = 0;
+    hcr.dvim() = 0;
 
     self()->vmcr(g->vmcr);
     self()->load_aprs(g->aprs);

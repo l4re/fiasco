@@ -124,7 +124,6 @@ inline
 Buddy_base::Head *
 Buddy_t_base<A,B>::buddy(void *block, unsigned long index, Head **new_block)
 {
-  //printf("buddy(%p, %ld)\n", block, index);
   unsigned long const size = Min_size << index;
   unsigned long const n_size = size << 1;
   if (index + 1 >= Num_sizes)
@@ -155,8 +154,6 @@ Buddy_t_base<A,B>::free(void *block, unsigned long size)
   //assert ((unsigned long)block - _base < Max_mem);
   assert (!_free_map[(reinterpret_cast<unsigned long>(block) - _base)
                      / Min_size]);
-  //bool _b = 0;
-  //if (_debug) printf("Buddy::free(%p, %ld)\n", block, size);
   unsigned size_index = 0;
   while ((static_cast<unsigned long>(Min_size) << size_index) < size)
     ++size_index;
@@ -174,23 +171,17 @@ Buddy_t_base<A,B>::free(void *block, unsigned long size)
       Head *b = buddy(block, size_index, &n);
       if (b)
 	{
-	//if (!_b && _debug) dump();
-	//if (_debug) printf("  found buddy %p (n=%p size=%ld)\n", b, n, size_index+1);
 	  B_list::remove(b);
 	  block = n;
 	  ++size_index;
-	  //_b = 1;
 	}
       else
 	break;
     }
 
-  //printf("  link free %p\n", block);
   Head::link(_free[size_index], block, size_index);
   _free_map.set_bit((reinterpret_cast<unsigned long>(block) - _base) / Min_size);
-  //if (_b && _debug) dump();
 }
-
 
 PUBLIC
 template<unsigned long A, int B>
@@ -201,9 +192,6 @@ Buddy_t_base<A,B>::add_mem(void *b, unsigned long size)
   unsigned long al_start;
   al_start = (start + Min_size - 1) & ~(Min_size - 1);
 
-  //printf("Buddy::add_mem(%p, %lx): al_start=%lx; _base=%lx\n", b, size, al_start, _base);
-
-  // _debug = 0;
   if (size <= al_start - start)
     return;
 
@@ -216,11 +204,7 @@ Buddy_t_base<A,B>::add_mem(void *b, unsigned long size)
       al_start += Min_size;
       size -= Min_size;
     }
-  // _debug = 1;
-  //dump();
 }
-
-
 
 PRIVATE
 template<unsigned long A, int B>
@@ -228,8 +212,6 @@ inline
 void
 Buddy_t_base<A,B>::split(Head *b, unsigned size_index, unsigned i)
 {
-  //unsigned si = size_index;
-  //printf("Buddy::split(%p, %d, %d)\n", b, size_index, i);
   for (; i > size_index; ++size_index)
     {
       unsigned long buddy = reinterpret_cast<unsigned long>(b)
@@ -237,8 +219,6 @@ Buddy_t_base<A,B>::split(Head *b, unsigned size_index, unsigned i)
       Head::link(_free[size_index], reinterpret_cast<void*>(buddy), size_index);
       _free_map.set_bit((buddy - _base) / Min_size);
     }
-
-  //if (si!=i) dump();
 }
 
 PUBLIC
@@ -257,8 +237,6 @@ Buddy_t_base<A,B>::alloc(unsigned long size)
             size, static_cast<unsigned long>(Min_size) << size_index,
             __builtin_return_address(0));
 
-  //printf("[%u]: Buddy::alloc(%ld)[ret=%p]: size_index=%d\n", Proc::cpu_id(), size, __builtin_return_address(0), size_index);
-
   for (unsigned i = size_index; i < Num_sizes; ++i)
     {
       Head *f = _free[i].front();
@@ -268,7 +246,6 @@ Buddy_t_base<A,B>::alloc(unsigned long size)
 	  split(f, size_index, i);
 	  _free_map.clear_bit((reinterpret_cast<unsigned long>(f) - _base)
                         / Min_size);
-	  //printf("[%u]: =%p\n", Proc::cpu_id(), f);
 	  return f;
 	}
     }

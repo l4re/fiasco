@@ -172,6 +172,8 @@ Buddy_t_base<A,B>::free(void *block, unsigned long size)
       if (b)
 	{
 	  B_list::remove(b);
+	  _free_map.clear_bit((reinterpret_cast<unsigned long>(b) - _base)
+	                      / Min_size);
 	  block = n;
 	  ++size_index;
 	}
